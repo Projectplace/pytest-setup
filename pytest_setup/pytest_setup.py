@@ -17,8 +17,13 @@ def pytest_configure(config):
 
 def _get_representation(class_name, request):
     base = request.config.getini('representation_path').lower()
-    module = importlib.import_module(base)
+    module = importlib.import_module(base.replace('/', '.'))
     return getattr(module, class_name)
+
+
+def pytest_addoption(parser):
+    parser.addini('representation_path',
+                  help='directory for representations')
 
 
 @pytest.fixture(scope='module')
@@ -106,7 +111,7 @@ def _setup(test_data, test_db, request):
 
     for data in test_data:
         for obj, params in data.items():
-            obj_to_create = eval(obj)
+            obj_to_create = _get_representation(obj, request)
             if isinstance(params, list):  # if params is a list, that means we have multiple objects to create
                 for sig in params:  # We must work on a copy of the data or else rerunfailures/flaky fails
                     created_obj = _create(obj_to_create, sig.copy(), test_db, request)
