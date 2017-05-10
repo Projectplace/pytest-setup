@@ -87,7 +87,7 @@ def setup_function(request, test_db):
     if not setup_data:
         return
 
-    _setup(request.function.setup_data.args, test_db, request)
+    _setup(setup_data.args, test_db, request)
 
 
 def _setup(test_data, test_db, request):
