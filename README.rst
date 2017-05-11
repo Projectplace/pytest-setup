@@ -40,7 +40,7 @@ SIGNATURE
 _________
 
 This is a dictionary containing the parameter-names of the create-function. The names are the keys and the type of the
-name are the values. For example our ``User`` has a name, this is basestring (that will handle both unicode and str).
+name are the values. For example our ``User`` has a name, this is ``basestring` (that will handle both unicode and str).
 
 Note: SIGNATURE is a keyword and so must be in all caps.
 
@@ -58,8 +58,8 @@ Example:
 
     class User(object):
 
-        def __init__(self, user_name=name):
-            self.user_name = name
+        def __init__(self, user_name):
+            self.user_name = user_name
 
         SIGNATURE = {'name': basestring, 'project': project.Project}
 
@@ -71,17 +71,38 @@ Example:
 Usage
 *****
 
-text
+When the ``User`` artifact is in place you can now use the marker to create as many users as you want.
+There is currently two ways of creating objects: on the module level and on the function level.
 
 Module level
 ____________
 
-text
+Objects created on the module level will be available for every test function in the module.
+The syntax is:
+
+.. code-block:: python
+
+  module_setup_data = [{'Class Name1': [{'key': 'value', 'key': 'value'},  # Class Name1 obj one
+                                        {'key': 'value', 'key': 'value'}]},  # Class Name2 obj one
+                       {'Class Name2': [{'key': 'value'}]}]
+
+This will create two objects of type ``Class Name1`` and one object of type ``Class Name2``.
 
 Function level
 ______________
 
-text
+Objects created on the function level will be available for *only* that decorated test function.
+The syntax is:
+
+.. code-block:: python
+
+  @pytest.mark.setup_data({'Class Name1': [{'key': 'value', 'key': 'value'},  # Class Name1 obj one
+                                           {'key': 'value', 'key': 'value'}]},  # Class Name2 obj one
+                          {'Class Name2': [{'key': 'value'}]})
+
+This will create two objects of type ``Class Name1`` and one object of type ``Class Name2``.
+
+Example of using both:
 
 .. code-block:: python
 
@@ -91,8 +112,12 @@ text
 
     @pytest.mark.setup_data({'User': [{'name': 'Tom Jones', 'project': 'MyProject'}]})
     def test_login(test_db):
-        login_user(test_db.get('User', 'Tom Jones')
+        login_user(user=test_db.get('User', 'Tom Jones',
+                   password='111111',
+                   project=test_db.get('Project', 'MyProject'))
 
+Test Database
+*************
 
 
 
