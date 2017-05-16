@@ -1,5 +1,6 @@
 import pytest
 import importlib
+import re
 
 
 def pytest_configure(config):
@@ -17,7 +18,7 @@ def pytest_configure(config):
 
 def _get_representation(class_name, request):
     base = request.config.getini('representation_path').lower()
-    module = importlib.import_module(base.replace('/', '.'))
+    module = importlib.import_module(re.sub(r"\\|/", ".", base))
     return getattr(module, class_name)
 
 
