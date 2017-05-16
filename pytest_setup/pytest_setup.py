@@ -35,8 +35,9 @@ def test_db(request):
     :param request: py.test request module
     :return: TestDataCollection instance
     """
+    from . import database
 
-    tdc = _get_representation("TestDataCollection", request)()
+    tdc = database.TestDataCollection()
 
     yield tdc
 
