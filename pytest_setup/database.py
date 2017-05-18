@@ -1,3 +1,4 @@
+from .pytest_setup import basestring
 
 
 class TestDataCollection(object):
@@ -54,7 +55,7 @@ class TestDataCollection(object):
         if ttl:
             for category in self.categories:
                 current = self.db[category]
-                for identifier in current.keys():
+                for identifier in list(current.keys()):
                     if current[identifier].ttl == ttl:
                         del current[identifier]
         else:
