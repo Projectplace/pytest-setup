@@ -39,7 +39,8 @@ class TestDataCollection(object):
             category_db = self.db.setdefault(category.__name__, {})
             if obj.identifier in category_db:
                 raise KeyError(
-                    "Duplicate identifier <{}> in category <{}> for object <{}>".format(obj.identifier, category.__name__, obj))
+                    "Duplicate identifier <{}> in category <{}> for object "
+                    "<{}>".format(obj.identifier, category.__name__, obj))
             category_db[obj.identifier] = obj
         obj.ttl = ttl
         return obj
@@ -61,7 +62,8 @@ class TestDataCollection(object):
         """
         Clear the DB and all its references.
 
-        :param ttl: If set, db will only be cleared from objects with specifid ttl
+        :param ttl: If set, db will only be cleared from objects with
+        specified ttl
         :return: None
         """
         if ttl:

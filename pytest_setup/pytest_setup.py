@@ -59,7 +59,8 @@ def pytest_addoption(parser):
 @pytest.fixture(scope='module')
 def test_db(request):
     """
-    Creates a TestDataCollection instance which houses all the data representation objects.
+    Creates a TestDataCollection instance which houses all the data
+    representation objects.
 
     :param request: py.test request module
     :return: TestDataCollection instance
@@ -76,7 +77,8 @@ def test_db(request):
 @pytest.fixture(scope='function', autouse=True)
 def clean_test_db(request, test_db):
     """
-    This will clear the TestDataCollection from all objects with a ttl of 'function'.
+    This will clear the TestDataCollection from all objects with a ttl of
+    'function'.
 
     :param request: py.test request module
     :param test_db: fixture test_db
@@ -136,19 +138,26 @@ def _setup(test_data, test_db, request):
         if hasattr(created_obj, 'default_representations'):
             representations = created_obj.default_representations
             if not isinstance(representations, list):
-                raise RuntimeError("default_representations must return a list!")
+                raise RuntimeError(
+                    "default_representations must return a list!")
             for each in _flatten_list(representations):
                 test_db.add(each, request.scope)
 
     for data in test_data:
         for obj, params in data.items():
             obj_to_create = _get_representation(obj, request)
-            if isinstance(params, list):  # if params is a list, that means we have multiple objects to create
-                for sig in params:  # We must work on a copy of the data or else rerunfailures/flaky fails
-                    created_obj = _create(obj_to_create, sig.copy(), test_db, request)
+            # if params is a list, that means we have multiple objects to
+            # create
+            if isinstance(params, list):
+                for sig in params:
+                    # We must work on a copy of the data or else
+                    # rerunfailures/flaky fails
+                    created_obj = _create(obj_to_create, sig.copy(),
+                                          test_db, request)
                     _add()
             else:
-                created_obj = _create(obj_to_create, params.copy(), test_db, request)
+                created_obj = _create(obj_to_create, params.copy(),
+                                      test_db, request)
                 _add()
 
 
@@ -163,23 +172,27 @@ def _create(obj_to_create, test_params, test_db, request):
     :return: instance of created object
     """
 
-    # object_param is the name of the param from representation objects create-function
+    # object_param is the name of the param from representation objects
+    # create-function
     for object_param in obj_to_create.SIGNATURE.keys():
 
-        # get the value from the signature provided by parametrize (by the test), if no value was specified
-        # the value will be None
+        # get the value from the signature provided by parametrize
+        # (by the test), if no value was specified the value will be None
         test_param_value = test_params.get(object_param, None)
 
         # get the type of the param (object_param) from the signature
         object_param_type = obj_to_create.SIGNATURE[object_param]
 
-        # if test_param_value and object_param_type is of the same type, usually (base)string, we continue
+        # if test_param_value and object_param_type is of the same type,
+        # usually (base)string, we continue
         if isinstance(test_param_value, object_param_type):
             continue
-        # elif test_param_value is of type basestring, we get the object represented by object_param_type
-        # and test_param_value
+        # elif test_param_value is of type basestring, we get the object
+        # represented by object_param_type and test_param_value
         elif isinstance(test_param_value, basestring):
-            test_params[object_param] = _find_object(test_db, object_param_type, test_param_value)
+            test_params[object_param] = _find_object(test_db,
+                                                     object_param_type,
+                                                     test_param_value)
         # else we remove the parameter because object_param defaults to None
         else:
             test_params.pop(object_param, None)
@@ -190,7 +203,9 @@ def _create(obj_to_create, test_params, test_db, request):
 
     try:
         return obj_to_create.create(**test_params)
-    except IndexError:  # Sometimes we get a 'Failue to persist' which causes a IndexError, so we retry once.
+    except IndexError:
+        # Sometimes we get a 'Failue to persist' which causes a IndexError,
+        # so we retry once.
         from time import sleep
         sleep(5)
         return obj_to_create.create(**test_params)
@@ -206,11 +221,12 @@ def _is_legacy(obj, request):
     """
     if obj.__name__ == "EnterpriseProject":
         if request.scope == 'module' and hasattr(request.module, 'pytestmark'):
-            if isinstance(request.module.pytestmark, list):
-                if any("legacy" in marker.name for marker in request.module.pytestmark):
+            p_mark = request.module.pytestmark
+            if isinstance(p_mark, list):
+                if any("legacy" in marker.name for marker in p_mark):
                     return True
             else:
-                if request.module.pytestmark.name == "legacy":
+                if p_mark.name == "legacy":
                     return True
         if request.scope == 'function' and hasattr(request.function, 'legacy'):
             return True
@@ -219,7 +235,8 @@ def _is_legacy(obj, request):
 
 def _find_object(test_db, object_type, value):
     """
-    Due to some representations having an inheritance structure this functions finds the correct type in the test DB.
+    Due to some representations having an inheritance structure this
+    functions finds the correct type in the test DB.
 
     :param test_db: test DB
     :param object_type:
@@ -238,7 +255,8 @@ def _find_object(test_db, object_type, value):
 
 def _flatten_list(representations):
     """
-    The default_representation can sometimes be a list of lists, this flattens that list.
+    The default_representation can sometimes be a list of lists,
+    this flattens that list.
 
     :param representations: list of object representations
     :return: flattened list of representations
