@@ -119,7 +119,7 @@ Example of using both:
 Test Database
 *************
 
-To easily manage all the created data the plugin provides a simple
+To easily manage all the created data the plugin provides a simple key-value database.
 
 
 
