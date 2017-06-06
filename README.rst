@@ -121,11 +121,12 @@ Test Database
 
 To easily manage all the created data the plugin provides a simple key-value database.
 
+More to come...
 
-
+Topics to cover
+***************
 
 scope
-signature
 default representations
 test_db fixture
 test_db scope
