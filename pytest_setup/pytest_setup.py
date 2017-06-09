@@ -51,6 +51,32 @@ def _get_representation(class_name, request):
     return getattr(module, class_name)
 
 
+def _get_representation2(class_name, request):
+    """ optional solution to importing representation modules """
+    import os
+
+    base = request.config.getini('representation_path').lower()
+    if base == '.':
+        repr_path = os.getcwd()
+        base = repr_path.split(os.sep).pop()
+    else:
+        repr_path = os.path.join(os.getcwd(), base)
+        base = re.sub(r"\\|/", ".", base)
+
+    if not base.endswith('.'):
+        base += '.'
+
+    for root, dirs, files in os.walk(repr_path):
+        for each in files:
+            if each.endswith('.py'):
+                try:
+                    module = importlib.import_module(base + each[:-3])
+                    return getattr(module, class_name)
+                except (AttributeError, ImportError):
+                    continue
+    return "FAIL"
+
+
 def pytest_addoption(parser):
     parser.addini('representation_path',
                   help='directory for representations')
