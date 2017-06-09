@@ -15,7 +15,13 @@ Getting started
 
 In your project you'll need a directory that contains the different artifacts
 that you'll be creating. This directory needs to be a python package, ie. it
-needs to contain an ``__init__.py`` file.
+needs to contain an ``__init__.py`` file. Also, that __init__-file needs to contain
+all the imports to the individual representations.
+
+.. code-block:: python
+
+    from .user import User
+    from .project import Project
 
 In our examples we'll call the directory ``representations``.
 
@@ -66,11 +72,11 @@ Example:
     class User(object):
 
         def __init__(self, user_name):
-            self.user_name = user_name
+            self._user_name = user_name
 
         @property
         def identifier(self):
-            return self.user_name
+            return self._user_name
 
         SIGNATURE = {'name': basestring, 'project': project.Project}
 
@@ -132,13 +138,46 @@ Test Database
 
 To easily manage all the created data the plugin provides a simple key-value database.
 
-More to come...
+The database is accessed via the pytest fixture ``test_db``.
 
-Topics to cover
-***************
+.. code-block:: python
 
-scope
-default representations
-test_db fixture
-test_db scope
-test_db duplicates
+    def test_login(test_db):
+        user = test_db.get('User', 'Tommy')
+
+The first argument to ``get`` is the object as a string you want to get, the second argument is the
+identifier mentioned earlier.
+
+If you so wish, you can also ``add`` to the database. The first argument is the object you wish to add
+and the second, optional, argument is the time-to-live (ttl) which can be either "function" or "module".
+
+The ttl corresponds to the scope of the setup-data. For "function" that data is only available during the scope
+of that decorated test function. For "module" it's available for all the test functions within that module.
+
+Advanced Usage
+**************
+
+In some cases an object you create in turn creates its own objects. If you want those objects available
+in the test database, you need to provide the creating object with a ``default _representations`` property.
+
+Let's say we have an account object that also creates a user object.
+
+.. code-block:: python
+
+    from .representations.user import User
+
+    class Account(object):
+
+        def __init__(self, account_name):
+            self._account_name = account_name
+            self._user = User.create("Account Owner")
+
+        @property
+        def identifier(self):
+            return self._account_name
+
+        @property
+        def default_representations
+            return [self._user]
+
+The ``default_representations`` property has to return a list with the object(s) it creates.
