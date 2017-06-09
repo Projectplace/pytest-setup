@@ -41,7 +41,7 @@ SIGNATURE
 _________
 
 This is a dictionary containing the parameter-names of the create-function. The names are the keys and the type of the
-name are the values. For example our ``User`` has a name, this is ``basestring` (that will handle both unicode and str).
+name are the values. For example our ``User`` has a name, this is ``basestring`` (that will handle both unicode and str).
 
 Note: SIGNATURE is a keyword and so must be in all caps.
 
@@ -80,7 +80,7 @@ Example:
             return cls(name)
 
 Usage
-*****
+-----
 
 When the ``User`` artifact is in place you can now use the marker to create as many users as you want.
 There is currently two ways of creating objects: on the module level and on the function level.
