@@ -3,10 +3,43 @@ import pytest
 
 pytest_plugins = 'pytester'
 
+USER_CLASS = """
+class BaseUser(object):
+    def __init__(self, user_name, identifier):
+        self._user_name = user_name
+        self._identifier = identifier
+
+    @property
+    def user_name(self):
+        return self._user_name
+
+    @property
+    def identifier(self):
+        return self._identifier
+
+    SIGNATURE = {'name': str}
+
+    @classmethod
+    def create(cls, name):
+        return cls(name, name)
+
+class User(BaseUser):
+    def __init__(self, user_name, identifier):
+        super(User, self).__init__(user_name, identifier)
+        self._owner = Owner.create(user_name + "s Ownah")
+
+    @property
+    def default_representations(self):
+        return [self._owner]
+
+class Owner(BaseUser):
+    def __init__(self, user_name, identifier):
+        super(Owner, self).__init__(user_name, identifier)
+"""
+
 
 @pytest.fixture()
 def repren(request, testdir):
-
     testdir.makepyfile(__init__="""""")
     testdir.makefile('.ini', pytest="""
         [pytest]
@@ -16,39 +49,7 @@ def repren(request, testdir):
     repr_dir.join('__init__.py').write(py.code.Source("""
         from .user import BaseUser, User, Owner
         """))
-    repr_dir.join('user.py').write(py.code.Source("""
-        class BaseUser(object):
-            def __init__(self, user_name, identifier):
-                self._user_name = user_name
-                self._identifier = identifier
-
-            @property
-            def user_name(self):
-                return self._user_name
-
-            @property
-            def identifier(self):
-                return self._identifier
-
-            SIGNATURE = {'name': str}
-
-            @classmethod
-            def create(cls, name):
-                return cls(name, name)
-
-        class User(BaseUser):
-            def __init__(self, user_name, identifier):
-                super(User, self).__init__(user_name, identifier)
-                self._owner = Owner.create(user_name + "s Ownah")
-
-            @property
-            def default_representations(self):
-                return [self._owner]
-
-        class Owner(BaseUser):
-            def __init__(self, user_name, identifier):
-                super(Owner, self).__init__(user_name, identifier)
-    """))
+    repr_dir.join('user.py').write(py.code.Source(USER_CLASS))
     return testdir
 
 

@@ -31,10 +31,8 @@ For details refer to the `pytest documentation <http://pytest.org/en/latest/cust
 Next we need to create a class for the artifact we want to create using our marker.
 Let's create a ``user`` artifact.
 
-There are two requirements for our class:
-
-* *SIGNATURE* This is a dictionary containing the names of the parameters for the ``create()`` function.
-* *create()* This is the create-function of the artifact called by the plugin.
+Requirements
+------------
 
 SIGNATURE
 _________
@@ -43,6 +41,12 @@ This is a dictionary containing the parameter-names of the create-function. The 
 name are the values. For example our ``User`` has a name, this is ``basestring` (that will handle both unicode and str).
 
 Note: SIGNATURE is a keyword and so must be in all caps.
+
+Property identifier
+___________________
+
+Each class/artifact needs to provide a property called ``identifier``, this is used to get data from the test
+database and is also used by the database to make sure there are no duplicates.
 
 create()
 ________
@@ -60,6 +64,10 @@ Example:
 
         def __init__(self, user_name):
             self.user_name = user_name
+
+        @property
+        def identifier(self):
+            return self.user_name
 
         SIGNATURE = {'name': basestring, 'project': project.Project}
 
