@@ -34,6 +34,8 @@ Let's create a ``user`` artifact.
 Requirements
 ------------
 
+There are a couple of requirements for the plugin to work.
+
 SIGNATURE
 _________
 
