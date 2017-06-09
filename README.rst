@@ -21,7 +21,8 @@ In our examples we'll call the directory ``representations``.
 
 The relative path to ``representations`` needs to go into a pytest INI-style
 file.
-For details refer to the `pytest documentation <http://pytest.org/en/latest/customize.html#command-line-options-and-configuration-file-settings>`_.
+For details refer to the `pytest documentation
+<http://pytest.org/en/latest/customize.html#command-line-options-and-configuration-file-settings>`_.
 
 .. code-block:: ini
 
@@ -141,4 +142,3 @@ default representations
 test_db fixture
 test_db scope
 test_db duplicates
-
