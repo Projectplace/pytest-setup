@@ -169,7 +169,7 @@ def setup_module(request, test_db):
 
 
 @pytest.fixture(scope='function', autouse=True)
-def setup_function(request, test_db):
+def setup_function(request, test_db, user, users):
     """
     Function level object factory.
 
