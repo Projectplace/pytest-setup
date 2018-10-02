@@ -238,3 +238,14 @@ def test_default_repren(repren):
     """)
     result = repren.runpytest()
     assert_outcomes(result)
+
+
+def test_test_name(repren):
+    repren.makepyfile("""
+        import pytest
+
+        def test_pass(test_name):
+            assert test_name == 'test_pass'
+    """)
+    result = repren.runpytest()
+    assert_outcomes(result)

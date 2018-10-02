@@ -12,6 +12,7 @@ limitations under the License.
 """
 import pytest
 import importlib
+import logging
 import sys
 import re
 
@@ -25,11 +26,37 @@ is_py2 = (_ver[0] == 2)
 #: Python 3.x?
 is_py3 = (_ver[0] == 3)
 
+
 if is_py2:
     basestring = basestring
 
 if is_py3:
     basestring = (str, bytes)
+
+
+LOGGER = logging.getLogger(__name__)
+
+
+def retry_on_error(error):
+    """ Decorator rerunning wrapped method upon caught error """
+
+    def wrapper(func):
+        def exc_handler(*args, **kwargs):
+            import time
+            import random
+
+            for i in range(10):
+                try:
+                    return func(*args, **kwargs)
+                except error as e:
+                    LOGGER.warning("Retry failed with error: {}".format(e))
+                    if i == 9:
+                        LOGGER.exception("Retrying failed, re-raising")
+                        raise error("Retrying failed!")
+                    time.sleep(0.5 + random.random())
+                    continue
+        return exc_handler
+    return wrapper
 
 
 def pytest_configure(config):
@@ -115,6 +142,17 @@ def clean_test_db(request, test_db):
     test_db.clear(request.scope)
 
 
+@pytest.fixture(scope='function')
+def test_name(request):
+    """
+    Returns the current tests name
+
+    :param request: py.test request module
+    :return: current tests name
+    """
+    return request.function.__name__
+
+
 @pytest.fixture(scope='module', autouse=True)
 def setup_module(request, test_db):
     """
@@ -141,6 +179,7 @@ def setup_function(request, test_db):
     :param test_db: fixture test_db
     :return: None
     """
+    # setup_data = request.node.get_closest_marker('setup_data')
     setup_data = request.node.get_marker('setup_data')
 
     if not setup_data:
@@ -187,6 +226,7 @@ def _setup(test_data, test_db, request):
                 _add()
 
 
+@retry_on_error(IndexError)
 def _create(obj_to_create, test_params, test_db, request):
     """
     Create test data object (real object representation).
@@ -223,10 +263,6 @@ def _create(obj_to_create, test_params, test_db, request):
         else:
             test_params.pop(object_param, None)
 
-        # We can remove this when legacy is dead and gone! [JB 2017-01-12]
-        if _is_legacy(obj_to_create, request):
-            test_params['in_classic'] = True
-
     try:
         return obj_to_create.create(**test_params)
     except IndexError:
@@ -235,28 +271,6 @@ def _create(obj_to_create, test_params, test_db, request):
         from time import sleep
         sleep(5)
         return obj_to_create.create(**test_params)
-
-
-def _is_legacy(obj, request):
-    """
-    Determine if an EnterpriseProject should be legacy/classic or harmony
-
-    :param obj: Object to be created
-    :param request: py.test request module
-    :return: bool
-    """
-    if obj.__name__ == "EnterpriseProject":
-        if request.scope == 'module' and hasattr(request.module, 'pytestmark'):
-            p_mark = request.module.pytestmark
-            if isinstance(p_mark, list):
-                if any("legacy" in marker.name for marker in p_mark):
-                    return True
-            else:
-                if p_mark.name == "legacy":
-                    return True
-        if request.scope == 'function' and hasattr(request.function, 'legacy'):
-            return True
-    return False
 
 
 def _find_object(test_db, object_type, value):
@@ -276,7 +290,11 @@ def _find_object(test_db, object_type, value):
         obj = test_db.get(class_type.__name__, value)
         if obj:
             return obj
-    raise
+    raise RuntimeError(
+        "Failed to find object of type {} with name {}".format(
+            object_type.__name__, value
+        )
+    )
 
 
 def _flatten_list(representations):
