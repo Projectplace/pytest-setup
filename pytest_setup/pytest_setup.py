@@ -164,12 +164,7 @@ def user(request, test_db):
     :param test_db: fixture test_db
     :return: None
     """
-    # Remove if-statement and use only get_closest_marker when we
-    # stop supporting anything 3.6.X or lower
-    if pytest.__version__ == "3.7.0":
-        user_data = request.node.get_closest_marker("user")
-    else:
-        user_data = request.node.get_marker('user')
+    user_data = request.node.get_closest_marker("user")
 
     if not user_data:
         return
@@ -192,12 +187,7 @@ def users(request, test_db):
     :param test_db: fixture test_db
     :return: None
     """
-    # Remove if-statement and use only get_closest_marker when we
-    # stop supporting anything 3.6.X or lower
-    if pytest.__version__ == "3.7.0":
-        user_data = request.node.get_closest_marker("users")
-    else:
-        user_data = request.node.get_marker('users')
+    user_data = request.node.get_closest_marker("users")
 
     if not user_data:
         return
@@ -251,12 +241,7 @@ def setup_function(request, test_db, user, users):
     :param test_db: fixture test_db
     :return: None
     """
-    # Remove if-statement and use only get_closest_marker when we
-    # stop supporting anything 3.6.X or lower
-    if pytest.__version__ == "3.7.0":
-        setup_data = request.node.get_closest_marker("setup_data")
-    else:
-        setup_data = request.node.get_marker('setup_data')
+    setup_data = request.node.get_closest_marker("setup_data")
 
     if not setup_data:
         return

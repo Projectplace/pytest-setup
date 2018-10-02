@@ -22,7 +22,7 @@ setup(name='pytest-setup',
       packages=['pytest_setup'],
       entry_points={'pytest11': ['setup = pytest_setup.pytest_setup']},
       setup_requires=['setuptools_scm'],
-      install_requires=['pytest>=2.9.0'],
+      install_requires=['pytest>=3.6.1'],
       license='Mozilla Public License 2.0 (MPL 2.0)',
       keywords='py.test pytest setup data',
       classifiers=[
