@@ -153,6 +153,78 @@ def test_name(request):
     return request.function.__name__
 
 
+@pytest.fixture(scope='function')
+def user(request, test_db):
+    """
+    Creates user in designated account or project.
+    Example:
+        @pytest.mark.user(name='Tim', account='acc_name')
+
+    :param request: py.test request module
+    :param test_db: fixture test_db
+    :return: None
+    """
+    # Remove if-statement and use only get_closest_marker when we
+    # stop supporting anything 3.6.X or lower
+    if pytest.__version__ == "3.7.0":
+        user_data = request.node.get_closest_marker("user")
+    else:
+        user_data = request.node.get_marker('user')
+
+    if not user_data:
+        return
+    # We must work on a copy of the data or else rerunfailures/flaky fails
+    user_data = user_data.kwargs.copy()
+    _create_user(request, test_db, user_data)
+
+
+@pytest.fixture(scope="function")
+def users(request, test_db):
+    """
+    Creates several users in designated account(s) or project(s).
+    Example:
+        @pytest.mark.users([
+            {'name': 'Tim', 'account': 'acc_name'},
+            {'name': 'Rush', 'project': 'acc_name'}
+        ])
+
+    :param request: py.test request module
+    :param test_db: fixture test_db
+    :return: None
+    """
+    # Remove if-statement and use only get_closest_marker when we
+    # stop supporting anything 3.6.X or lower
+    if pytest.__version__ == "3.7.0":
+        user_data = request.node.get_closest_marker("users")
+    else:
+        user_data = request.node.get_marker('users')
+
+    if not user_data:
+        return
+    # We must work on a copy of the data or else rerunfailures/flaky fails
+    user_data = tuple(user_data.args)
+    for each in user_data[0]:
+        _create_user(request, test_db, each)
+
+
+def _create_user(request, test_db, user_data):
+    account = user_data.pop("account", None)
+    project = user_data.pop("project", None)
+
+    data = [{'User': [user_data]}]
+    _setup(data, test_db, request)
+
+    _user = test_db.get("User", user_data['name'])
+
+    if account:
+        account = test_db.get("Account", account)
+        account.add_member(account.owner, _user)
+
+    if project:
+        project = test_db.get("Project", project)
+        project.add_member(project.head_admin, _user.email)
+
+
 @pytest.fixture(scope='module', autouse=True)
 def setup_module(request, test_db):
     """
@@ -179,8 +251,12 @@ def setup_function(request, test_db, user, users):
     :param test_db: fixture test_db
     :return: None
     """
-    # setup_data = request.node.get_closest_marker('setup_data')
-    setup_data = request.node.get_marker('setup_data')
+    # Remove if-statement and use only get_closest_marker when we
+    # stop supporting anything 3.6.X or lower
+    if pytest.__version__ == "3.7.0":
+        setup_data = request.node.get_closest_marker("setup_data")
+    else:
+        setup_data = request.node.get_marker('setup_data')
 
     if not setup_data:
         return
