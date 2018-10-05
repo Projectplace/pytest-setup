@@ -78,6 +78,12 @@ def _get_representation(class_name, request):
     return getattr(module, class_name)
 
 
+def _get_base_representation(request):
+    base_repr_class_name = request.config.getini('base_repr_class_name')
+    if base_repr_class_name:
+        return _get_representation(base_repr_class_name, request)
+
+
 def _get_representation2(class_name, request):
     """ optional solution to importing representation modules """
     import os
@@ -107,6 +113,8 @@ def _get_representation2(class_name, request):
 def pytest_addoption(parser):
     parser.addini('representation_path',
                   help='directory for representations')
+    parser.addini('base_repr_class_name',
+                  help='class name of the base representation')
 
 
 @pytest.fixture(scope='module')
@@ -120,7 +128,8 @@ def test_db(request):
     """
     from . import database
 
-    tdc = database.TestDataCollection()
+    base_representation_class = _get_base_representation(request)
+    tdc = database.TestDataCollection(base_representation_class)
 
     yield tdc
 

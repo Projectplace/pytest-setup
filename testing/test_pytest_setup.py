@@ -43,7 +43,8 @@ def repren(request, testdir):
     testdir.makepyfile(__init__="""""")
     testdir.makefile('.ini', pytest="""
         [pytest]
-        representation_path = {}0/repr
+        representation_path = {}0/repr\n
+        base_repr_class_name = BaseUser
     """.format(request.function.__name__))
     repr_dir = testdir.mkdir('repr')
     repr_dir.join('__init__.py').write(py.code.Source("""

@@ -22,6 +22,13 @@ class TestDataCollection(object):
     """
     db = {}
 
+    def __init__(self, base_repr):
+        """
+        :param base_repr: The base representation class of
+                            which all other representations are based on
+        """
+        self.base_repr = base_repr
+
     def add(self, obj, ttl='module'):
         """
         Add data representation object to the collection.
@@ -33,7 +40,7 @@ class TestDataCollection(object):
         import inspect
 
         for category in inspect.getmro(type(obj)):
-            if category == object:
+            if category in (self.base_repr, object):
                 continue
 
             category_db = self.db.setdefault(category.__name__, {})
