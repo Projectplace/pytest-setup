@@ -35,6 +35,14 @@ For details refer to the `pytest documentation
   [pytest]
   representation_path = <from project root relative path to>/representations
 
+The pytest.ini file will also need the name of your class that all other representations will be
+based on. If you only have the one then give the name of that class.
+
+.. code-block:: ini
+  [pytest]
+  base_repr_class_name = <Name of the base representation class in the representations folder>
+
+
 Next we need to create a class for the artifact we want to create using our marker.
 Let's create a ``user`` artifact.
 
