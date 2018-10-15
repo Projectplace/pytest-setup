@@ -209,6 +209,7 @@ def users(request, test_db):
 def _create_user(request, test_db, user_data):
     account = user_data.pop("account", None)
     project = user_data.pop("project", None)
+    site_index = user_data.pop('site_index', None)
 
     data = [{'User': [user_data]}]
     _setup(data, test_db, request)
@@ -217,11 +218,11 @@ def _create_user(request, test_db, user_data):
 
     if account:
         account = test_db.get("Account", account)
-        account.add_member(account.owner, _user)
+        account.add_member(account.owner, _user, site_index=site_index)
 
     if project:
         project = test_db.get("Project", project)
-        project.add_member(project.head_admin, _user.email)
+        project.add_member(project.head_admin, _user.email, site_index=site_index)
 
 
 @pytest.fixture(scope='module', autouse=True)
