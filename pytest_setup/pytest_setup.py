@@ -222,7 +222,7 @@ def _create_user(request, test_db, user_data):
 
     if project:
         project = test_db.get("Project", project)
-        project.add_member(project.head_admin, _user.email, site_index=site_index)
+        project.add_member(project.head_admin, _user.email)
 
 
 @pytest.fixture(scope='module', autouse=True)
