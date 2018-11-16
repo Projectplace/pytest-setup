@@ -10,6 +10,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from builtins import range
+from past.builtins import basestring
 import pytest
 import importlib
 import logging
@@ -271,16 +273,18 @@ def _setup(test_data, test_db, request):
     def _add():
         test_db.add(created_obj, request.scope)
         # This adds objects created within an object creation to the test_db
-        if hasattr(created_obj, 'default_representations'):
+        try:
             representations = created_obj.default_representations
             if not isinstance(representations, list):
                 raise RuntimeError(
                     "default_representations must return a list!")
             for each in _flatten_list(representations):
                 test_db.add(each, request.scope)
+        except KeyError as e:
+            LOGGER.debug("Failed to get default_representations from object with error: {}".format(e))
 
     for data in test_data:
-        for obj, params in data.items():
+        for obj, params in list(data.items()):
             obj_to_create = _get_representation(obj, request)
             # if params is a list, that means we have multiple objects to
             # create
@@ -311,7 +315,7 @@ def _create(obj_to_create, test_params, test_db, request):
 
     # object_param is the name of the param from representation objects
     # create-function
-    for object_param in obj_to_create.SIGNATURE.keys():
+    for object_param in list(obj_to_create.SIGNATURE.keys()):
 
         # get the value from the signature provided by parametrize
         # (by the test), if no value was specified the value will be None
